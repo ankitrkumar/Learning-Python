@@ -17,7 +17,7 @@ for i in sys.argv:
 if not (len(sys.argv) > 1):
 	print 'No source to backup', len(sys.argv)
 	sys.exit()
-target_dir = 'D:\\Backup_dir'
+target_dir = './Backup_dir'
 
 if not os.path.exists(target_dir):
 	os.mkdir(target_dir)
