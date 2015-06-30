@@ -58,9 +58,10 @@ def after_login(resp):
 		user = User(nickname = nickname, email = resp.email)
 		db.session.add(user)
 		db.session.commit()
+		db.session.add(user.follow(user))
+		db.session.commit()
 	remember_me = False
-	db.session.add(user.follow(user))
-	db.session.commit()
+	
 	if'remember_me' in session:
 		remember_me = session['remember_me']
 		session.pop('remember_me', None)
