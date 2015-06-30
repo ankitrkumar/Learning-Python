@@ -1,29 +1,32 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from app import app, db, lm, oid
 from flask.ext.login import login_user, logout_user, current_user, login_required
-from .forms import LoginForm, EditForm
-from .models import User
+from .forms import LoginForm, EditForm, PostForm
+from .models import User, Post
 from datetime import datetime
+from config import POSTS_PER_PAGE
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods =['GET','POST'])
+@app.route('/index', methods =['GET','POST'])
+@app.route('/index/<int:page>', methods =['GET','POST'])
 @login_required
-def index():
-	user = g.user
-	posts = [
-		{
-			'author' : {'nickname' : 'Anuj'},
-			'body' : 'Working fellow now!'
-		},
-		{
-			'author' : {'nickname' : 'Susan'},
-			'body': 'some bitch'
-		}
-	]
+def index(page = 1):
+	form = PostForm()
+	if form.validate_on_submit():
+		post = Post(body = form.post.data, timestamp = datetime.utcnow(), author = g.user)
+		db.session.add(post)
+		db.session.commit()
+		flash('Post published.')
+		return redirect(url_for('index'))		#this request makes sure that on a refresh we
+												# don't do a Post, if user refreshes we get the 
+												#GET request for the index post and not the POST 
+												#request which will post the new post again
+	posts = g.user.followed_posts().paginate(page, POSTS_PER_PAGE, False)
 	return render_template('index.html',
 		title = 'Home', 
-		user = user,
+		form = form,
 		posts = posts)
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
@@ -55,10 +58,9 @@ def after_login(resp):
 		user = User(nickname = nickname, email = resp.email)
 		db.session.add(user)
 		db.session.commit()
-		db.session.add(user.follow(user))
-		db.session.commit()
 	remember_me = False
-
+	db.session.add(user.follow(user))
+	db.session.commit()
 	if'remember_me' in session:
 		remember_me = session['remember_me']
 		session.pop('remember_me', None)
@@ -83,16 +85,14 @@ def load_user(id):
 	return User.query.get(int(id))
 
 @app.route('/user/<nickname>')
+@app.route('/user/<nickname>/<int:page>')
 @login_required
-def user(nickname):
+def user(nickname, page = 1):
 	user = User.query.filter_by(nickname = nickname).first()
 	if user == None:
 		flash('User %s not found.' % nickname)
 		return redirect(url_for('index'))
-	posts = [
-	{'author': user, 'body':'Test post #1'},
-	{'author': user, 'body':'Test post #2'}
-	]
+	posts = user.posts.paginate(page, POSTS_PER_PAGE, False)
 	return render_template('user.html',
 							user = user,
 							posts = posts)
@@ -152,8 +152,6 @@ def unfollow(nickname):
 	db.session.commit()
 	flash('Unfollowing ' + nickname + ' successful!')
 	return redirect(url_for('user', nickname= nickname))
-
-
 
 
 

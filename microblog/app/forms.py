@@ -25,3 +25,6 @@ class EditForm(Form):
 			self.nickname.errors.append('Nickname not available. Pick another nickname.')
 			return False
 		return True
+
+class PostForm(Form):
+	post = StringField('post', validators = [DataRequired()] )
