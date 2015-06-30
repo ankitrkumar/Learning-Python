@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from .forms import LoginForm, EditForm, PostForm, SearchForm
 from .models import User, Post
 from datetime import datetime
-from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
+from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES
 
 @app.route('/', methods =['GET','POST'])
 @app.route('/index', methods =['GET','POST'])
@@ -172,6 +172,21 @@ def search_results(query):
 							)
 
 
+@app.route('/delete/<int:id>')
+@login_required
+def delete(id):
+	post = Post.query.get(id)
+	if post is None:
+		flash('Post Not Found.')
+		return redirect(url_for('index'))
+	if post.author.id != g.user.id:
+		flash('Can only delte your own posts!')
+		return redirect(url_for('index'))
+	db.session.delete(post)
+	db.session.commit()
+	flash('Post deleted.')
+	return redirect(url_for('index'))
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
@@ -180,4 +195,3 @@ def not_found_error(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
-

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 WTF_CSRF_ENABLED = True
 SECRET_KEY ='some-random-key-here'
@@ -16,7 +17,7 @@ SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
 #mail server settings
 MAIL_SERVER = 'localhost'
-MAIL_PORT = 25
+MAIL_PORT = 2
 MAIL_USERNAME = None
 MAIL_PASSWORD = None
 
@@ -29,4 +30,10 @@ POSTS_PER_PAGE = 5
 
 #whoosh config
 WHOOSH_BASE = os.path.join(basedir, 'search.db')
-MAX_SEARCH_RESULTS = 50
+MAX_SEARCH_RESULTS = 0
+
+#available langauges
+LANGUAGES ={
+	'en' : 'English',
+	'es' : 'Español'
+}
