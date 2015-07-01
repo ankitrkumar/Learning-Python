@@ -4,7 +4,8 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from .forms import LoginForm, EditForm, PostForm, SearchForm
 from .models import User, Post
 from datetime import datetime
-from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES
+from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, DATABASE_QUERY_TIMEOUT
+from flask.ext.sqlalchemy import get_debug_queries
 
 @app.route('/', methods =['GET','POST'])
 @app.route('/index', methods =['GET','POST'])
@@ -76,6 +77,13 @@ def before_request():
 		db.session.add(g.user)
 		db.session.commit()
 		g.search_form = SearchForm()
+
+@app.after_request
+def after_request(resp):
+	for query in get_debug_queries():
+		if query.duration >= DATABASE_QUERY_TIMEOUT:
+			app.logger.warning("SLOW QUERY: %s\nParameters: %s\nDuration: %fs\nContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+	return resp
 
 @app.route('/logout')
 def logout():

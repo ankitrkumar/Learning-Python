@@ -37,3 +37,6 @@ LANGUAGES ={
 	'en' : 'English',
 	'es' : 'Español'
 }
+
+DATABASE_QUERY_TIMEOUT = 0.5
+SQLALCHEMY_RECORD_QUERIES = True
