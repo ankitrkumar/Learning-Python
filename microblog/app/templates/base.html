@@ -8,9 +8,9 @@
     <script src="/static/js/moment.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% if title %}
-    <title>{{ title }} - microblog</title>
+    <title>{{ title }} - Thots</title>
     {% else %}
-    <title>Welcome to microblog</title>
+    <title>Welcome to Thots</title>
     {% endif %}
   </head>
 
@@ -23,7 +23,7 @@
              <span class="icon-bar"></span>
              <span class="icon-bar"></span>
            </a>
-           <a class="brand" href="/">microblog</a>
+           <a class="brand" href="/">Thots</a>
              <ul class="nav">
                <li><a href="{{ url_for('index') }}">Home</a></li>
                {% if g.user.is_authenticated() %}
